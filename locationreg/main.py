@@ -2,6 +2,8 @@
 from typing import Optional
 from pydantic import BaseModel
 from fastapi import FastAPI, Response
+from uvicorn import run
+
 
 app = FastAPI()
 
@@ -55,3 +57,8 @@ def make_registrations(location: str, registration: Registration):
 
 
 
+def main():
+    run(app, host="0.0.0.0", port=8000)
+
+if __name__ == "__main__":
+    main()
