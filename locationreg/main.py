@@ -3,6 +3,8 @@ from locationreg.domain import Location, Registration
 from fastapi import FastAPI, Response
 from uvicorn import run
 
+from locationreg.persistence import RegistrationRepository
+
 
 app = FastAPI()
 
@@ -14,7 +16,7 @@ location_map = {
     "oslo": Location(location_name='oslo', latitude=59.9112197, longitude=10.7330275),
 }
 
-counter = 0
+p = RegistrationRepository()
 
 # 'hello word' to see if everyting is running
 @app.get("/checkhealth")
@@ -26,18 +28,16 @@ def read_root():
 @app.get("/locations/{location}/registrations")
 def show_registrations(location:str):
     if location in location_map:
-        return location_map[location]
+        loc = location_map[location]
+        return [reg for reg in p.read_registrations() if reg.location_name == location]
     else:
         return Response(content=f"Unknown location: {location}", status_code=404)
 
 @app.post("/locations/{location}/registrations")
 def make_registrations(location: str, registration: Registration):
     if location in location_map:
-        global counter
         loc = location_map[location]
-        registration.id = counter
-        registration.location_name = location
-        counter += 1
+        reg = p.create_registration(registration.contact_details, location)
         loc.registrations.append(registration)
         return registration
     else:

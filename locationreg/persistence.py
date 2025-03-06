@@ -40,9 +40,9 @@ class RegistrationRepository:
         self._write_current_state()
         return result
 
-    def read_registrations(self):
-        # TODO: implement
-        pass 
+    def read_registrations(self) -> list[Registration]:
+        return list(self.registrations_dict.values())
+    
 
     def update_registration(self):
         # TODO: implement
@@ -61,6 +61,6 @@ class RegistrationRepository:
 
 
 # Reading
-p = RegistrationRepository()
-for v in p.registrations_dict.values():
-    print(v.contact_details)
+# p = RegistrationRepository()
+# for v in p.registrations_dict.values():
+#     print(v.contact_details)
