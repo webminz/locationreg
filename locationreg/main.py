@@ -1,6 +1,5 @@
 
-from typing import Optional
-from pydantic import BaseModel
+from locationreg.domain import Location, Registration
 from fastapi import FastAPI, Response
 from uvicorn import run
 
@@ -8,17 +7,6 @@ from uvicorn import run
 app = FastAPI()
 
 
-class Registration(BaseModel):
-    location_name: str | None = None
-    contact_details: str 
-    id: Optional[int] = None
-
-
-class Location(BaseModel):
-    location_name: str 
-    latitude: float 
-    longitude: float
-    registrations: list[Registration] = []
 
 location_map = {
     "bergen": Location(location_name='bergen', latitude=60.3911838, longitude=5.3255599),
