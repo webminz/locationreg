@@ -1,12 +1,35 @@
+from abc import abstractmethod
 from pydantic import BaseModel
 from locationreg.domain import Registration
-import json
 
 
 class StoreRegistrations(BaseModel):
     registrations : list[Registration]
 
-class RegistrationRepository:
+class AbstractRegistrationRepository:
+    
+    @abstractmethod
+    def create_registration(self, contect_details: str, location: str) -> Registration:
+        pass
+
+    @abstractmethod
+    def read_registrations(self) -> list[Registration]:
+        pass
+
+    @abstractmethod
+    def update_registration(self, reg: Registration):
+        pass
+
+
+    @abstractmethod
+    def delete_registration(self, reg: Registration):
+        pass
+
+
+class RegistrationRepository(AbstractRegistrationRepository):
+    """
+    using the local file system for persistence
+    """
 
     def __init__(self) -> None:
         self.registrations_dict : dict[int, Registration] = {}
@@ -44,23 +67,16 @@ class RegistrationRepository:
         return list(self.registrations_dict.values())
     
 
-    def update_registration(self):
-        # TODO: implement
-        pass 
-
-    def delete_registrations(self):
-        # TODO: implement
-        pass
+    def update_registration(self, reg: Registration):
+        assert reg.id is not None and reg.id in self.registrations_dict
+        self.registrations_dict[reg.id] = reg
+        self._write_current_state()
 
 
+    def delete_registration(self, reg: Registration):
+        assert reg.id is not None and reg.id in self.registrations_dict
+        del self.registrations_dict[reg.id]
+        self._write_current_state()
 
-# Writing
-# p = RegistrationRepository()
-# p.create_registration("past@hvl.no", "bergen")
-# p.create_registration("bob@example.org", "oslo")
 
-
-# Reading
-# p = RegistrationRepository()
-# for v in p.registrations_dict.values():
-#     print(v.contact_details)
+# TODO: implement the same using an object storage

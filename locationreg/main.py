@@ -9,7 +9,6 @@ from locationreg.persistence import RegistrationRepository
 app = FastAPI()
 
 
-
 location_map = {
     "bergen": Location(location_name='bergen', latitude=60.3911838, longitude=5.3255599),
     "trondheim": Location(location_name='trondheim', latitude=63.4304427, longitude=10.3952956),
@@ -29,7 +28,8 @@ def read_root():
 def show_registrations(location:str):
     if location in location_map:
         loc = location_map[location]
-        return [reg for reg in p.read_registrations() if reg.location_name == location]
+        loc.registrations = [reg for reg in p.read_registrations() if reg.location_name == location]
+        return loc
     else:
         return Response(content=f"Unknown location: {location}", status_code=404)
 
@@ -38,8 +38,8 @@ def make_registrations(location: str, registration: Registration):
     if location in location_map:
         loc = location_map[location]
         reg = p.create_registration(registration.contact_details, location)
-        loc.registrations.append(registration)
-        return registration
+        loc.registrations.append(reg)
+        return reg
     else:
         return Response(content=f"Unknown location: {location}", status_code=404)
 
