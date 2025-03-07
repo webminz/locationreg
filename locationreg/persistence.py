@@ -100,6 +100,13 @@ class MinioRegistrationRepository(AbstractRegistrationRepository):
         self._read_state()
 
     def _read_state(self):
+        found = False
+        for o in self.client.list_objects(self.bucket_name):
+            if o.object_name == "storage.json":
+                found = True 
+                break
+        if not found:
+            return
         response = self.client.get_object(self.bucket_name, "storage.json")
         if response.status == 200:
             parsed =  StoreRegistrations.model_validate_json(response.read().decode())
