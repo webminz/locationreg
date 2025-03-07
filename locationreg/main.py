@@ -44,6 +44,15 @@ def make_registrations(location: str, registration: Registration):
         return Response(content=f"Unknown location: {location}", status_code=404)
 
 
+@app.delete("/locations/{location}/registrations/{registration}")
+def delete_registration(location: str, registration: int):
+    if location in location_map:
+        loc = location_map[location]
+        for r in p.read_registrations(): 
+            if r.id == registration and r.location_name == location:
+                loc.registrations.remove(r)
+                p.delete_registration(r)
+        
 
 def main():
     run(app, host="0.0.0.0", port=8000)

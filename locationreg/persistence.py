@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from locationreg.domain import Registration
 from minio import Minio
 from io import BytesIO
-
+from pathlib import Path
 
 
 class StoreRegistrations(BaseModel):
@@ -41,14 +41,15 @@ class RegistrationRepository(AbstractRegistrationRepository):
         self._read_state()
 
     def _read_state(self):
-        fil = open("storage.json", "rt")
-        parsed = StoreRegistrations.model_validate_json(fil.read())
-        self.registrations_dict = {}
-        self.id_counter = len(parsed.registrations)
-        for r in parsed.registrations:
-            assert r.id is not None
-            self.registrations_dict[r.id] = r
-        fil.close()
+        if Path("storage.json").exists():
+            fil = open("storage.json", "rt")
+            parsed = StoreRegistrations.model_validate_json(fil.read())
+            self.registrations_dict = {}
+            self.id_counter = len(parsed.registrations)
+            for r in parsed.registrations:
+                assert r.id is not None
+                self.registrations_dict[r.id] = r
+            fil.close()
 
     def _write_current_state(self):
         fil = open("storage.json", "wt")
