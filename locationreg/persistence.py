@@ -5,6 +5,7 @@ from locationreg.domain import Registration
 from minio import Minio
 from io import BytesIO
 from pathlib import Path
+from psycopg2 import  connect
 
 
 class StoreRegistrations(BaseModel):
@@ -147,5 +148,32 @@ class MinioRegistrationRepository(AbstractRegistrationRepository):
         assert reg.id is not None and reg.id in self.registrations_dict
         del self.registrations_dict[reg.id]
         self._write_current_state()
+
+
+
+class PgRegistrationRepository(AbstractRegistrationRepository):
+
+
+    def __init__(self) -> None:
+        db_host = os.environ["PG_HOST"]
+        db_name = os.environ["PG_NAME"]
+        db_user = os.environ["PG_USER"]
+        db_pass = os.environ["PG_PASS"]
+        self.connection = connect(f"postgresql://{db_user}:{db_pass}@{db_host}:5432/{db_name}")
+        super().__init__()
+
+    def read_registrations(self) -> list[Registration]:
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT id, contact_details, location_name FROM registrations")
+        result = []
+        for row in cursor.fetchall():
+            result.append(Registration(id=row[0], contact_details=row[1], location_name=row[2]))
+        cursor.close()
+        return result
+
+
+
+
+
 
 
