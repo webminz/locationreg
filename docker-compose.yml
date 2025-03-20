@@ -1,0 +1,36 @@
+name: locationregservices
+services:
+  server:
+    image: locationreg
+    ports:
+      - "8000:8000"
+    environment:
+      PERSISTENCE: POSTGRES 
+      PG_HOST: db
+      PG_PORT: "5432"
+      PG_USER: admin
+      PG_PASS: secret
+      PG_NAME: postgres
+    networks:
+     - locationregnet
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: postgres
+    volumes:
+        - type: volume 
+          source: locationregvol
+          target: /var/lib/postgresql
+        - type: bind
+          source: ./migrations
+          target: /docker-entrypoint-initdb.d
+    networks:
+     - locationregnet
+volumes:
+  locationregvol:
+networks:
+  locationregnet:

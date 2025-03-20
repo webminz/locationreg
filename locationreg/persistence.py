@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import time
 import os
 from locationreg.domain import Location, LocationsManager, Registration
 from minio import Minio
@@ -188,7 +189,17 @@ class PostgresRepository(AbstractRepository):
         db_user = os.environ["PG_USER"]
         db_pass = os.environ["PG_PASS"]
         db_port = os.environ['PG_PORT']
-        self.connection = connect(f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}")
+        tries = 3
+        while tries > 0:
+            try:
+                self.connection = connect(f"postgresql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}")
+                tries = 0
+            except Exception as e:
+                tries -= 1
+                if tries == 0:
+                    raise e
+                else:
+                    time.sleep(1)
 
     def _fetch_for_location(self, cursor,  location: Location, location_id: int):
         cursor.execute("SELECT id, contact_details FROM registrations WHERE location_id = %s", (location_id,))
